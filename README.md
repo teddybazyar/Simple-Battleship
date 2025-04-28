@@ -1,7 +1,8 @@
 # Simple-Battleship
 
 This simple Battleship game was created using the C language. The user will be going against the computer (PLAYER 2). 
-## Objective: The goal is to sink all of your opponent’s ships before they sink yours.
+## Objective: 
+    The goal is to sink all of your opponent’s ships before they sink yours.
 ## Setup: Each player places ships on a hidden grid. 
   Ships vary in length and are placed either horizontally or vertically.
 ## Gameplay: Players take turns calling out grid coordinates (like "B4" or "H7") to try and hit the opponent’s ships.
