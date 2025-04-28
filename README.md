@@ -12,7 +12,10 @@ This simple Battleship game was created using the C language. The user will be g
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 * MAIN.C file includes main area where most of the game will function.
+
 * BATTLESHIP.C file contains different game prototype functions, such as checking if there's a winner, initializing game board, updating game board, etc.
+  
 * BATTLESHIP.H file contains type structures and different function prototypes.
+  
 * BATTLESHIP.LOG file contains the log statements of the different moves each player made. A formal stats chart will be printed by the end when a player
                 wins upon the log file.
