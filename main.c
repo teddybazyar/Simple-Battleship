@@ -94,7 +94,7 @@ int main (void) {
 
     int probability[ROWS][COLS] = {0};
 
-    printf("> Please select from the following menu:\n");
+    printf("\n> Please select from the following menu:\n");
     printf("> [1] Manually\n");
     printf("> [2] Randomly\n");
     printf("> Enter Option: ");
