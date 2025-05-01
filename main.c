@@ -84,6 +84,16 @@ int main (void) {
     initializeGameBoard(user);
     initializeGameBoard(computer);
 
+    // smart AI mode
+    int aiMode = 0;
+    printf("> Choose AI mode:\n");
+    printf("> [1] Regular AI (Random)\n");
+    printf("> [2] Smart AI (Probability Grid)\n");
+    printf("> Enter option: ");
+    scanf("%d", &aiMode);
+
+    int probability[ROWS][COLS] = {0};
+
     printf("> Please select from the following menu:\n");
     printf("> [1] Manually\n");
     printf("> [2] Randomly\n");
@@ -138,90 +148,156 @@ int main (void) {
                 printf("> Player 1's Board:\n");
                 printGameBoard(user, TRUE);
                 printf("> COMPUTER'S TURN\n");
-
-                if (hasAShipSunked) {
-                    hasAShipSunked = FALSE;
-                    targetMode = FALSE;
-                    huntMode = TRUE;
-                }
-
-                if (targetMode) {
-                    *target = *targetAI;
-                    do {
-                        *targetTemp = *target;
-
-                        if (cardinals[NORTH]) {
-                            north = target->row - counter;
-                            if (north >= 0) {
-                                targetTemp->row = north;
-                                shot = checkShot(user, *targetTemp);
-                                if (shot != -1) break;
+            
+                if (aiMode == 1) {
+                    // === Regular AI Mode ===
+                    if (hasAShipSunked) {
+                        hasAShipSunked = FALSE;
+                        targetMode = FALSE;
+                        huntMode = TRUE;
+                    }
+            
+                    if (targetMode) {
+                        *target = *targetAI;
+                        do {
+                            *targetTemp = *target;
+                            if (cardinals[NORTH]) {
+                                north = target->row - counter;
+                                if (north >= 0) {
+                                    targetTemp->row = north;
+                                    shot = checkShot(user, *targetTemp);
+                                    if (shot != -1) break;
+                                }
                             }
-                        }
-                        if (cardinals[SOUTH]) {
-                            south = target->row + counter;
-                            if (south <= 9) {
-                                targetTemp->row = south;
-                                shot = checkShot(user, *targetTemp);
-                                if (shot != -1) break;
+                            if (cardinals[SOUTH]) {
+                                south = target->row + counter;
+                                if (south <= 9) {
+                                    targetTemp->row = south;
+                                    shot = checkShot(user, *targetTemp);
+                                    if (shot != -1) break;
+                                }
                             }
-                        }
-                        if (cardinals[WEST]) {
-                            west = target->column - counter;
-                            if (west >= 0) {
-                                targetTemp->column = west;
-                                shot = checkShot(user, *targetTemp);
-                                if (shot != -1) break;
+                            if (cardinals[WEST]) {
+                                west = target->column - counter;
+                                if (west >= 0) {
+                                    targetTemp->column = west;
+                                    shot = checkShot(user, *targetTemp);
+                                    if (shot != -1) break;
+                                }
                             }
-                        }
-                        if (cardinals[EAST]) {
-                            east = target->column + counter;
-                            if (east <= 9) {
-                                targetTemp->column = east;
-                                shot = checkShot(user, *targetTemp);
-                                if (shot != -1) break;
+                            if (cardinals[EAST]) {
+                                east = target->column + counter;
+                                if (east <= 9) {
+                                    targetTemp->column = east;
+                                    shot = checkShot(user, *targetTemp);
+                                    if (shot != -1) break;
+                                }
                             }
+            
+                            counter++;
+                            shot = -1;
+                            if (!cardinals[NORTH] && !cardinals[SOUTH] && !cardinals[WEST] && !cardinals[EAST]) {
+                                targetMode = FALSE;
+                                huntMode = TRUE;
+                                break;
+                            }
+                        } while (shot == -1 && targetMode);
+            
+                        if (shot == 1) {
+                            for (i = 0; i < 4; i++)
+                                cardinals[i] = FALSE;
                         }
-
-                        counter++;
-                        shot = -1;
-                        if (!cardinals[NORTH] && !cardinals[SOUTH] && !cardinals[WEST] && !cardinals[EAST]) {
-                            targetMode = FALSE;
-                            huntMode = TRUE;
-                            break;
-                        }
-                    } while (shot == -1 && targetMode);
-
+                    }
+            
+                    if (huntMode) {
+                        counter = 1;
+                        flipper = TRUE;
+                        for (i = 0; i < 4; i++) cardinals[i] = TRUE;
+            
+                        do {
+                            target->row = getRandomNumber(0, 9);
+                            target->column = getRandomNumber(0, 9);
+                            shot = checkShot(user, *target);
+                        } while (shot == -1);
+            
+                        if (shot == 1)
+                            *targetOrigin = *target;
+                    }
+            
                     if (shot == 1) {
-                        for (i = 0; i < 4; i++)
-                            cardinals[i] = FALSE;
+                        if (!cardinals[NORTH] && !cardinals[SOUTH] && !cardinals[WEST] && !cardinals[EAST])
+                            *target = *targetOrigin;
+            
+                        huntMode = FALSE;
+                        targetMode = TRUE;
+                        *targetAI = *target;
                     }
                 }
-
-                if (huntMode) {
-                    counter = 1;
-                    flipper = TRUE;
-                    for (i = 0; i < 4; i++) cardinals[i] = TRUE;
-
-                    do {
-                        target->row = getRandomNumber(0, 9);
-                        target->column = getRandomNumber(0, 9);
-                        shot = checkShot(user, *target);
-                    } while (shot == -1);
-
-                    if (shot == 1)
-                        *targetOrigin = *target;
+                else if (aiMode == 2) {
+                    // === Smart AI Mode (Probability Grid) ===
+                    int probability[ROWS][COLS] = {0};
+            
+                    for (int r = 0; r < ROWS; r++) {
+                        for (int c = 0; c < COLS; c++) {
+                            if (user[r][c].isHit) continue;
+            
+                            for (int s = 0; s < NUM_OF_SHIPS; s++) {
+                                int len = ship[s].length;
+            
+                                // Check horizontal placement
+                                if (c + len <= COLS) {
+                                    int valid = 1;
+                                    for (int k = 0; k < len; k++) {
+                                        if (user[r][c + k].isHit) {
+                                            valid = 0;
+                                            break;
+                                        }
+                                    }
+                                    if (valid) for (int k = 0; k < len; k++) probability[r][c + k]++;
+                                }
+            
+                                // Check vertical placement
+                                if (r + len <= ROWS) {
+                                    int valid = 1;
+                                    for (int k = 0; k < len; k++) {
+                                        if (user[r + k][c].isHit) {
+                                            valid = 0;
+                                            break;
+                                        }
+                                    }
+                                    if (valid) for (int k = 0; k < len; k++) probability[r + k][c]++;
+                                }
+                            }
+                        }
+                    }
+            
+                    // Prefer cells next to a known hit
+                    for (int r = 0; r < ROWS; r++) {
+                        for (int c = 0; c < COLS; c++) {
+                            if (!user[r][c].isHit && (
+                                    (r > 0     && user[r - 1][c].isHit && user[r - 1][c].symbol != WATER) ||
+                                    (r < 9     && user[r + 1][c].isHit && user[r + 1][c].symbol != WATER) ||
+                                    (c > 0     && user[r][c - 1].isHit && user[r][c - 1].symbol != WATER) ||
+                                    (c < 9     && user[r][c + 1].isHit && user[r][c + 1].symbol != WATER))) {
+                                probability[r][c] += 10; // Boost around hits
+                            }
+                        }
+                    }
+            
+                    int maxProb = -1;
+                    for (int r = 0; r < ROWS; r++) {
+                        for (int c = 0; c < COLS; c++) {
+                            if (!user[r][c].isHit && probability[r][c] > maxProb) {
+                                maxProb = probability[r][c];
+                                target->row = r;
+                                target->column = c;
+                            }
+                        }
+                    }
+            
+                    shot = checkShot(user, *target);
                 }
-
-                if (shot == 1) {
-                    if (!cardinals[NORTH] && !cardinals[SOUTH] && !cardinals[WEST] && !cardinals[EAST])
-                        *target = *targetOrigin;
-
-                    huntMode = FALSE;
-                    targetMode = TRUE;
-                    *targetAI = *target;
-                }
-
+            
                 shipSymbol = user[target->row][target->column].symbol;
                 break;
         }

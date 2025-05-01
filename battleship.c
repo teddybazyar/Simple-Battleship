@@ -34,23 +34,39 @@ void initializeGameBoard(Cell **board) {
 
 // Print the game board, optionally revealing ships
 void printGameBoard(Cell **board, Boolean revealShips) {
-    printf("    ");
+    printf(BOLD "\n     ");
     for (int col = 0; col < COLS; col++) {
-        printf("%d ", col);
+        printf("%2d ", col);
     }
     printf("\n");
 
     for (int row = 0; row < ROWS; row++) {
-        printf("%d | ", row);
+        printf(BOLD "%2d | " RESET, row);
         for (int col = 0; col < COLS; col++) {
-            if (revealShips || board[row][col].symbol == WATER || board[row][col].isHit) {
-                printf("%c ", board[row][col].symbol);
+            char symbol = board[row][col].symbol;
+            Boolean hit = board[row][col].isHit;
+
+            if (hit) {
+                if (symbol == WATER)
+                    printf(RED " X " RESET);  // Hit ship
+                else
+                    printf(GREEN " O " RESET);    // Miss
             } else {
-                printf("%c ", WATER);
+                if (symbol != WATER && revealShips) {
+                    printf(MAGENTA " %c " RESET, symbol);  // Reveal ship
+                } else {
+                    printf(BLUE " ~ " RESET);              // Water
+                }
             }
         }
         printf("\n");
     }
+
+    printf("\n" BOLD "Legend:\n" RESET);
+    printf(RED " X " RESET " = Hit, ");
+    printf(GREEN " O " RESET " = Miss, ");
+    printf(BLUE " ~ " RESET " = Water, ");
+    printf(MAGENTA " S " RESET " = Ship (if visible)\n\n");
 }
 
 // Allow the player to manually place ships on the board

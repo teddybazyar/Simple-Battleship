@@ -45,6 +45,16 @@ Purpose: Battleship h file that contains function prototypes,
 #define WEST 2
 #define EAST 3
 
+// colors
+#define RESET       "\x1b[0m"
+#define RED         "\x1b[31m"
+#define GREEN       "\x1b[32m"
+#define BLUE        "\x1b[34m"
+#define MAGENTA     "\x1b[35m"
+#define CYAN        "\x1b[36m"
+#define BOLD        "\x1b[1m"
+#define WHITE       "\x1b[37m"
+
 // Boolean values
 typedef enum {
     FALSE, TRUE
